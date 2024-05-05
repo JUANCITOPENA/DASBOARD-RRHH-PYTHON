@@ -35,6 +35,50 @@ Si deseas contribuir al proyecto, sigue estos pasos:
 - **Realiza tus modificaciones y haz commit.
 - **Envía un pull request para revisión.
 
+# Publicar en Streamlit Cloud
+
+Esta guía describe cómo publicar tu aplicación en Streamlit Cloud para que esté disponible para cualquier persona con un enlace. Sigue estos pasos para hacer que tu aplicación esté en línea y accesible.
+
+## 1. Configurar tu Repositorio
+
+- Asegúrate de que tu proyecto esté en un repositorio de GitHub o GitLab.
+- El repositorio debe contener:
+  - Un archivo Python con el código de tu aplicación Streamlit.
+  - Un archivo `requirements.txt` que liste las dependencias necesarias para tu aplicación.
+
+## 2. Crear una Cuenta en Streamlit Cloud
+
+- Visita [Streamlit Cloud](https://streamlit.io/cloud) y regístrate para obtener una cuenta gratuita.
+- Inicia sesión con tus credenciales.
+
+## 3. Publicar tu Aplicación
+
+- Desde el panel de Streamlit Cloud, haz clic en "New app" (Nueva aplicación).
+- Selecciona el servicio donde está tu repositorio (GitHub o GitLab).
+- Elige el repositorio que contiene tu aplicación.
+- Selecciona la rama y el archivo Python que deseas ejecutar como aplicación principal.
+- Opcionalmente, puedes dar un nombre personalizado a tu aplicación.
+- Haz clic en "Deploy!" (¡Desplegar!) para publicar tu aplicación.
+
+## 4. Ver tu Aplicación en Vivo
+
+- Una vez que tu aplicación se haya desplegado, recibirás un enlace para acceder a ella en Streamlit Cloud.
+- Puedes compartir este enlace para que otros vean tu aplicación en funcionamiento.
+
+## 5. Actualizar tu Aplicación
+
+- Cada vez que realices cambios en el repositorio y hagas un nuevo commit, Streamlit Cloud actualizará automáticamente tu aplicación.
+- Si necesitas desplegar manualmente, puedes hacerlo desde el panel de Streamlit Cloud.
+
+## Notas Importantes
+
+- Asegúrate de que tu archivo `requirements.txt` contenga todas las dependencias necesarias para tu aplicación.
+- Si tienes archivos adicionales (como imágenes o datos), asegúrate de que también estén en tu repositorio.
+- Streamlit Cloud tiene un límite de uso gratuito para aplicaciones públicas. Si necesitas más recursos, considera opciones de pago.
+
+
+
+
 ### Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para más detalles.
 
