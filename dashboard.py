@@ -6,6 +6,8 @@ import numpy as np  # Asegurarse de importar numpy
 import folium
 from streamlit_folium import st_folium
 import datetime
+import streamlit as st
+
 
 # Configurar el layout para que sea de ancho completo
 st.set_page_config(layout="wide")
@@ -169,68 +171,451 @@ with col9:
 st.markdown("<hr>", unsafe_allow_html=True)
 
 
-# SECCION DE LA TABLA: Y BUSQUEDA DE DATOS":
 
-# Título para la tabla con emoji, centrado
-st.markdown("<h2 style='text-align: center;'>📊 Tabla de Datos de Empleados</h2>", unsafe_allow_html=True)
+# Título para la sección de gráficos, con emoji y centrado
+st.markdown("<h2 style='text-align: center;'>📊 Gráficos de Empleados por Año y Mes</h2>", unsafe_allow_html=True)
 
-# Contenedor para centrar la caja de búsqueda y el botón
-with st.container():
-    st.markdown("<br>", unsafe_allow_html=True)  # Añadir un espacio para separar del título
-    # Crear una columna centrada para la caja de búsqueda y el botón
-    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
 
-    # Caja de búsqueda centrada
-    search_term = st.text_input("Buscar por código, nombre, departamento o posición:", "", help="Introduce el criterio de búsqueda")
+# Supongamos que tienes un DataFrame 'df' con las siguientes columnas:
+# - "Fecha_Ingreso": la fecha de ingreso de cada empleado.
+# - "Nombre_Empleado": el nombre del empleado.
+# - "Departamento": el departamento del empleado.
+# - "Salario": el salario del empleado.
+
+
+
+# Asegúrate de que la columna de fecha está en formato datetime
+df['Fecha_Ingreso'] = pd.to_datetime(df['Fecha_Ingreso'])
+
+# Calcular empleados acumulados por año
+df['Año_Ingreso'] = df['Fecha_Ingreso'].dt.year
+empleados_acumulados_por_ano = df.groupby('Año_Ingreso').size().cumsum().reset_index(name='Total_Empleados')
+
+# Calcular empleados por mes independientemente del año
+df['Mes'] = df['Fecha_Ingreso'].dt.strftime('%m')  # Extrae solo el mes
+empleados_por_mes = df.groupby('Mes').size().reset_index(name='Total_Empleados')
+
+# Crear dos columnas para mostrar los gráficos en la misma sección
+col1, col2 = st.columns(2)
+
+# Gráfico de área para empleados acumulados por año
+with col1:
+    st.plotly_chart(
+        px.area(
+            empleados_acumulados_por_ano,
+            x='Año_Ingreso',
+            y='Total_Empleados',
+            title='Empleados Acumulados por Año 📈',
+            color_discrete_sequence=['#28a745'],  # Color verde distintivo
+            line_shape='spline',  # Línea suave
+            hover_data={'Total_Empleados': ':.0f'}  # Tooltip con valor exacto
+        ).update_layout(
+            xaxis_title='Año',
+            yaxis_title='Empleados Acumulados'
+        ),
+        use_container_width=True
+    )
+
+# Gráfico de barras para empleados por mes
+with col2:
+    st.plotly_chart(
+        px.bar(
+            empleados_por_mes,
+            x='Mes',
+            y='Total_Empleados',
+            title='Empleados por Mes 📊',
+            color_discrete_sequence=['#17a2b8'],  # Color azul distintivo
+            text_auto=True,  # Mostrar valores en las barras
+            hover_data={'Total_Empleados': ':.0f'}  # Tooltip con valor exacto
+        ).update_traces(
+            textposition='outside'  # Texto fuera de las barras para claridad
+        ).update_layout(
+            xaxis_title='Mes',
+            yaxis_title='Total de Empleados'
+        ),
+        use_container_width=True
+    )
+
+# Asegurarse de que la columna 'Fecha_Salida' esté en formato datetime
+df['Fecha_Salida'] = pd.to_datetime(df['Fecha_Salida'])
+
+# Filtrar por renuncias y despidos
+renuncias_df = df[df['Status'] == 'Renuncia']
+despidos_df = df[df['Status'] == 'Despedido']
+
+# Calcular renuncias por año
+renuncias_df['Año_Salida'] = renuncias_df['Fecha_Salida'].dt.year
+renuncias_por_ano = renuncias_df.groupby('Año_Salida').size().reset_index(name='Total_Renuncias')
+
+# Calcular despidos por año
+despidos_df['Año_Salida'] = despidos_df['Fecha_Salida'].dt.year
+despidos_por_ano = despidos_df.groupby('Año_Salida').size().reset_index(name='Total_Despidos')
+
+# Crear dos columnas para mostrar dos gráficos
+col1, col2 = st.columns(2)
+
+# Gráfico de barras para renuncias por año
+with col1:
+    st.plotly_chart(
+        px.bar(
+            renuncias_por_ano,
+            x='Año_Salida',
+            y='Total_Renuncias',
+            title='Renuncias por Año 🚪',
+            labels={'Año_Salida': 'Año', 'Total_Renuncias': 'Total de Renuncias'},
+            color_discrete_sequence=['#FF5733'],  # Color distintivo
+            text_auto=True,
+            hover_data={'Total_Renuncias': ':.0f'}
+        ).update_traces(
+            textposition='outside'  # Texto fuera de las barras
+        ),
+        use_container_width=True
+    )
+
+# Gráfico de barras para despidos por año
+with col2:
+    st.plotly_chart(
+        px.bar(
+            despidos_por_ano,
+            x='Año_Salida',
+            y='Total_Despidos',
+            title='Despidos por Año 🔥',
+            labels={'Año_Salida': 'Año', 'Total_Despidos': 'Total de Despidos'},
+            color_discrete_sequence=['#C70039'],
+            text_auto=True,
+            hover_data={'Total_Despidos': ':.0f'}
+        ).update_traces(
+            textposition='outside'
+        ),
+        use_container_width=True
+    )
+
+# Asegúrate de que la columna 'Fecha_Salida' esté en formato datetime
+df['Fecha_Salida'] = pd.to_datetime(df['Fecha_Salida'])
+
+# Filtrar por renuncias y despidos
+renuncias_df = df[df['Status'] == 'Renuncia']
+despidos_df = df[df['Status'] == 'Despedido']
+
+# Calcular renuncias por mes (sin importar el año)
+renuncias_df['Mes_Salida'] = renuncias_df['Fecha_Salida'].dt.strftime('%m')
+renuncias_por_mes = renuncias_df.groupby('Mes_Salida').size().reset_index(name='Total_Renuncias')
+
+# Calcular despidos por mes (sin importar el año)
+despidos_df['Mes_Salida'] = despidos_df['Fecha_Salida'].dt.strftime('%m')
+despidos_por_mes = despidos_df.groupby('Mes_Salida').size().reset_index(name='Total_Despidos')
+
+# Crear dos columnas para gráficos
+col1, col2 = st.columns(2)
+
+# Gráfico de barras para renuncias por mes
+with col1:
+    st.plotly_chart(
+        px.bar(
+            renuncias_por_mes,
+            x='Mes_Salida',
+            y='Total_Renuncias',
+            title='Renuncias por Mes 📅',
+            color_discrete_sequence=['#FF5733'],  # Color distintivo para renuncias
+            text_auto=True,  # Mostrar valores sobre las barras
+            hover_data={'Total_Renuncias': ':.0f'}  # Datos adicionales en tooltip
+        ).update_traces(
+            textposition='outside'  # Ubicar texto fuera de las barras para mayor claridad
+        ).update_layout(
+            xaxis_title='Mes',
+            yaxis_title='Total de Renuncias'
+        ),
+        use_container_width=True
+    )
+
+# Gráfico de barras para despidos por mes
+with col2:
+    st.plotly_chart(
+        px.bar(
+            despidos_por_mes,
+            x='Mes_Salida',
+            y='Total_Despidos',
+            title='Despidos por Mes 🔥',
+            color_discrete_sequence=['#C70039'],  # Color distintivo para despidos
+            text_auto=True,
+            hover_data={'Total_Despidos': ':.0f'}  # Datos adicionales en tooltip
+        ).update_traces(
+            textposition='outside'
+        ).update_layout(
+            xaxis_title='Mes',
+            yaxis_title='Total de Despidos'
+        ),
+        use_container_width=True
+    )
+
+
+
+
+# Cargar datos desde Excel
+df = pd.read_excel("BASE_DE_DATOS_EMPLEADOS_ANALISIS_RRHH_DASHBOARD.xlsx")
+
+# Definir estilo CSS para las tarjetas
+style_card = """
+    <style>
+    .custom-card {
+        border: 1px solid black;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(50, 205, 50, 0.2);  # Sombra verde limón
+        background-color: white;
+        padding: 10px;
+        text-align: center;
+    }
     
-    # Botón debajo de la caja de búsqueda
-    search_button = st.button("🔍 Buscar", help="Pulsa para buscar")
+    .custom-card h1 {
+        font-weight: bold;
+        color: red;  # Color rojo para valores numéricos
+    }
     
-    st.markdown("</div>", unsafe_allow_html=True)  # Cerrar el div para centrar
+    .custom-card p {
+        font-weight: bold;
+    }
+    </style>
+"""
 
-# Filtrar el DataFrame según el término de búsqueda
-if search_button and search_term:
-    filtered_df = df[
-        df.apply(
-            lambda row: any(
-                search_term.lower() in str(row[col]).lower() for col in ["ID Empleado", "Nombre Empleado", "Departamento", "Posición"]
-            ),
-            axis=1,
-        )
-    ]
-else:
-    filtered_df = df  # Si no se busca, se muestra todo el DataFrame
 
-# Estilo para centrar texto y aplicar cuadrículas
+# Aplicar el estilo CSS personalizado
+st.markdown(style_card, unsafe_allow_html=True)
+
+# Sección para las tarjetas
+st.subheader("📊Resumen de Registros")
+
+# Filtrar por "Renuncia" y "Despedido"
+renuncia_df = df[df["Status"] == "Renuncia"]
+despido_df = df[df["Status"] == "Despedido"]
+
+# Crear tarjetas para conteos
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown(
+        f"""
+        <div class="custom-card">
+            <p>Número de Registros de Renuncia</p>
+            <h1>{len(renuncia_df)}</h1>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with col2:
+    st.markdown(
+        f"""
+        <div class="custom-card">
+            <p>Número de Registros de Despido</p>
+            <h1>{len(despido_df)}</h1>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# Sección para los gráficos
+st.subheader("📊Gráficos de Motivos de Renuncia y Despido")
+
+# Segmentador para empleados de renuncia y despido
+empleados_renuncia = renuncia_df["Nombre Empleado"].unique()
+empleados_despido = despido_df["Nombre Empleado"].unique()
+
+# Agregar segmentador para empleados de renuncia
+empleados_seleccionados_renuncia = st.multiselect(
+    "Seleccione empleados para el gráfico de renuncia:",
+    empleados_renuncia,
+)
+
+# Agregar segmentador para empleados de despido
+empleados_seleccionados_despido = st.multiselect(
+    "Seleccione empleados para el gráfico de despido:",
+    empleados_despido,
+)
+
+
+
+
+
+# Filtrar por empleados seleccionados antes de crear gráficos
+if empleados_seleccionados_renuncia:
+    renuncia_df = renuncia_df[renuncia_df["Nombre Empleado"].isin(empleados_seleccionados_renuncia)]
+
+if empleados_seleccionados_despido:
+    despido_df = despido_df[despido_df["Nombre Empleado"].isin(empleados_seleccionados_despido)]
+
+# Gráfico de barras horizontales para motivos de renuncia
+if not renuncia_df.empty:
+    # Agrupar y pintar barras con diferentes colores
+    renuncia_motivos = renuncia_df.groupby("Motivos Renuncia/Despiedos").size().reset_index(name="Empleados")
+
+    renuncia_bar = px.bar(
+        renuncia_motivos,
+        x="Empleados",  # El número de empleados en el eje X
+        y="Motivos Renuncia/Despiedos",  # El motivo en el eje Y
+        orientation='h',
+        color="Motivos Renuncia/Despiedos",  # Diferentes colores para cada motivo
+        title="🤝 Motivos de Renuncia"
+    )
+    renuncia_bar.update_layout(
+        yaxis_title="Motivos de Renuncia",
+        xaxis_title="Número de Empleados",
+        height=400
+    )
+
+    st.plotly_chart(renuncia_bar, use_container_width=True)
+
+# Gráfico de barras horizontales para motivos de despido
+if not despido_df.empty:
+    # Agrupar y pintar barras con diferentes colores
+    despido_motivos = despido_df.groupby("Motivos Renuncia/Despiedos").size().reset_index(name="Empleados")
+
+    despido_bar = px.bar(
+        despido_motivos,
+        x="Empleados",  # El número de empleados en el eje X
+        y="Motivos Renuncia/Despiedos",  # El motivo en el eje Y
+        orientation='h',
+        color="Motivos Renuncia/Despiedos",  # Diferentes colores para cada motivo
+        title="❌ Motivos de Despido"
+    )
+    despido_bar.update_layout(
+        yaxis_title="Motivos de Despido",
+        xaxis_title="Número de Empleados",
+        height=400
+    )
+
+    st.plotly_chart(despido_bar, use_container_width=True)
+
+
+
+# Título para las tablas, centrado y con emojis
+st.markdown("<h2 style='text-align: center;'>🚪 Empleados que Renunciaron y 🔥 Fueron Despedidos 📊</h2>", unsafe_allow_html=True)
+
+# Filtrar por empleados que renunciaron y empleados que fueron despedidos
+renuncias_df = df[df["Status"] == "Renuncia"]
+despidos_df = df[df["Status"] == "Despedido"]
+
+# Ordenar por "Código" (anteriormente "ID Empleado") de menor a mayor
+renuncias_df = renuncias_df.sort_values(by="ID Empleado", ascending=True)
+despidos_df = despidos_df.sort_values(by="ID Empleado", ascending=True)
+
+# Definir estilo CSS para tablas con cuadrículas, bordes y sombras
 st.markdown(
     """
     <style>
-    .dataframe {
-        background-color: #f9f9f9;  # Fondo pastel
-        border-collapse: collapse;  # Para cuadrículas visibles
+    .styled-table {
+        border-collapse: collapse;  /* Asegura que las celdas estén bien definidas */
+        margin: 25px 0;  /* Margen para separarlo de otros elementos */
+        font-size: 14px;  /* Tamaño de fuente más pequeño */
+        text-align: left;  /* Alineación del texto */
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);  /* Sombra para dar profundidad */
     }
-    .dataframe th, .dataframe td {
-        padding: 10px;  # Espaciado interno
-        border: 1px solid #ddd;  # Líneas de cuadrícula visibles
-        text-align: center;  # Centrar texto
+    .styled-table thead tr {
+        background-color: darkblue;  /* Fondo para el encabezado */
+        color: white;  /* Color del texto en el encabezado */
+        text-transform: uppercase;  /* Texto en mayúsculas */
+        font-size: 16px;  /* Tamaño de fuente más grande para encabezados */
+    }
+    .styled-table th, .styled-table td {
+        padding: 8px 12px;  /* Espaciado interno */
+        border-radius: 10px;  /* Bordes redondeados */
+        border: 1px solid #ddd;  /* Bordes visibles */
+    }
+    .styled-table tbody tr {
+        border-bottom: 1px solid #dddddd;  /* Separadores horizontales */
+    }
+    .styled-table tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;  /* Color de fondo para filas pares */
+    }
+    .styled-table tbody tr:last-of-type {
+        border-bottom: 2px solid darkblue;  /* Borde más grueso al final */
+    }
+    .styled-table tbody tr:hover {
+        background-color: #f1f1f1;  /* Color de fondo al pasar el cursor */
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+# Crear dos columnas para tablas en la misma sección
+col1, col2 = st.columns(2)
+
+# Tabla para empleados que renunciaron
+with col1:
+    st.write(
+        renuncias_df[["ID Empleado", "Nombre Empleado", "Motivos Renuncia/Despiedos"]]
+            .rename(columns={"ID Empleado": "Código"})  # Cambiar nombre de la columna
+            .to_html(index=False, classes="styled-table"),  # Aplicar estilo
+        unsafe_allow_html=True
+    )
+
+# Tabla para empleados que fueron despedidos
+with col2:
+    st.write(
+        despidos_df[["ID Empleado", "Nombre Empleado", "Motivos Renuncia/Despiedos"]]
+            .rename(columns={"ID Empleado": "Código"})  # Cambiar nombre de la columna
+            .to_html(index=False, classes="styled-table"),  # Aplicar estilo
+        unsafe_allow_html=True
+    )
+    
+# FIN DE LA TABLA CON LOS DATOS DE RENUNCIA Y DESPIDOS:
+
+
+
+
+# Asegurarse de que las columnas para filtrar existen en el DataFrame
+required_columns = ["ID Empleado", "Nombre Empleado", "Departamento", "Posición"]
+missing_columns = [col for col in required_columns if col not in df.columns]
+
+if missing_columns:
+    raise ValueError(f"Las siguientes columnas no están presentes en el DataFrame: {missing_columns}")
+
+# Crear un contenedor para la caja de búsqueda
+with st.container():
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+    search_term = st.text_input("Buscar por código, nombre, departamento o posición:", key="search_term")
+    search_button = st.button("🔍 Buscar", key="search_button")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# Filtrar el DataFrame según el término de búsqueda
+filtered_df = df  # Mostrar todo por defecto
+
+# Si el término de búsqueda tiene contenido, aplica el filtro
+if search_term:
+    filtered_df = df[
+        df.apply(
+            lambda row: any(
+                search_term.lower() in str(row[col]).lower() for col in required_columns
+            ),
+            axis=1,
+        )
+    ]
+
+# Si se presiona el botón y no hay término de búsqueda, limpiar
+if search_button and not search_term:
+    filtered_df = df  # Restablecer la tabla completa
+
 # Mostrar la tabla paginada centrada
 st.dataframe(filtered_df.style.set_properties(**{'text-align': 'center'}))
+
+
+
+
+
+
      
  # Espacio adicional para separar
 st.write("")  # Espacio para mejorar visualización
     
      
-    
+# SECCION ":  
+  
+
 # Mapa de colores para géneros
 color_map = {
-    "Femenino": "pink",  # Rosa para Femenino
-    "Masculino": "blue"  # Azul para Masculino
+    "Femenino": "#FDA7DF",  # Rosa para Femenino
+    "Masculino": "#0652DD"  # Azul para Masculino
 }
 
 # Crear dos columnas para gráficos
@@ -252,22 +637,81 @@ with col1:
 
 # Gráfico circular para "Distribución por Género"
 with col2:
+        # Gráfico circular para "Distribución por Género"
     st.plotly_chart(
         px.pie(
             df,
-            names="Género",  # Columna para definir segmentos
-            title="Distribución por Género",
-            color="Género",  # Asegurar que se usa la columna correcta para el color
-            color_discrete_map=color_map  # Aplicar el mapa de colores
+            names='Género',  # Columna para definir segmentos
+            title='Distribución por Género',
+            color='Género',  # Usar la columna correcta para el color
+            color_discrete_map=color_map,  # Aplicar el mapa de colores
+            hole=0.4  # Estilo rosquilla para un look más moderno
+        ).update_traces(
+            textinfo='label+percent+value',  # Mostrar nombre, porcentaje y valor
+            textfont=dict(size=14),  # Tamaño de fuente para mayor legibilidad
+            hoverinfo='label+percent+value',  # Información en tooltip
+            insidetextorientation='radial'  # Orientación del texto dentro del gráfico
+        ).update_layout(
+            uniformtext_minsize=14,  # Tamaño mínimo del texto
+            uniformtext_mode='hide'  # Esconder texto si no cabe para evitar solapamientos
         ),
         use_container_width=True
     )
-
 
 # Espacio adicional para separar
 st.write("")  # Espacio para mejorar visualización
     
 
+
+
+# Filtrar por renuncias y despidos
+renuncias_df = df[df['Status'] == 'Renuncia']
+despidos_df = df[df['Status'] == 'Despedido']
+
+# Mapa de colores para diferenciarlos
+color_map = {
+    'Femenino': '#FDA7DF',  # Rosa para Femenino
+    'Masculino': '#0652DD'  # Azul para Masculino
+}
+
+# Crear dos columnas para gráficos
+col1, col2 = st.columns(2)
+
+# Gráfico circular para "Distribución por Género" en Renuncias
+with col1:
+    st.plotly_chart(
+        px.pie(
+            renuncias_df,
+            names='Género',  # Columna para definir segmentos
+            title='Distribución por Género en Renuncias 🚪',
+            color='Género',  # Usar la columna correcta para el color
+            color_discrete_map=color_map,  # Aplicar el mapa de colores
+            hole=0.4  # Estilo rosquilla para un look más moderno
+        ).update_traces(
+            textinfo='label+percent+value',  # Mostrar etiqueta, porcentaje y valor
+            textfont=dict(size=14),  # Tamaño de fuente para mayor legibilidad
+            hoverinfo='label+percent+value'  # Información en tooltip
+        ),
+        use_container_width=True
+    )
+
+# Gráfico circular para "Distribución por Género" en Despidos
+with col2:
+    st.plotly_chart(
+        px.pie(
+            despidos_df,
+            names='Género',  # Columna para definir segmentos
+            title='Distribución por Género en Despidos 🔥',
+            color='Género',  # Usar la columna correcta para el color
+            color_discrete_map=color_map,  # Aplicar el mapa de colores
+            hole=0.4  # Estilo rosquilla para un look más moderno
+        ).update_traces(
+            textinfo='label+percent+value',  # Mostrar etiqueta, porcentaje y valor
+            textfont=dict(size=14),  # Tamaño de fuente para mayor legibilidad
+            hoverinfo='label+percent+value'  # Información en tooltip
+        ),
+        use_container_width=True
+    )
 
 
 
@@ -548,6 +992,14 @@ st_folium(mapa, width='100%', height=600)  # Ancho completo para el mapa
 st.markdown("<hr>", unsafe_allow_html=True)  # Separador para claridad
 
 
+# SECCION TABLA CON CUMPLEANOS CON FORMATO CONDICIONAL:
+
+# Asegurarse de que las fechas están en formato datetime
+df["Fecha_Ingreso"] = pd.to_datetime(df["Fecha_Ingreso"])
+df["Fecha_Actual"] = pd.to_datetime("today")
+
+# Calcular "Antiguedad" como años con un decimal
+df["Antiguedad"] = ((df["Fecha_Actual"] - df["Fecha_Ingreso"]).dt.days / 365.25).round(1)  # Considerar años bisiestos
 
 # Definir la función para calcular el próximo cumpleaños
 def calcular_proximo_cumpleanos(nacimiento, fecha_actual):
@@ -563,7 +1015,7 @@ df["Fecha Cumpleaños Calculado"] = df["Nacimiento"].apply(lambda x: calcular_pr
 # Calcular la cantidad de días hasta el próximo cumpleaños
 df["Días hasta Cumpleaños"] = (df["Fecha Cumpleaños Calculado"] - fecha_actual).dt.days
 
-# Filtrar para mostrar solo empleados con cumpleaños dentro de 3 meses (90 días)
+# Filtrar para mostrar solo empleados con cumpleaños dentro de 3 meses (30 días)
 df_3_meses = df[df["Días hasta Cumpleaños"] <= 30]
 
 # Ordenar por fecha de cumpleaños más cercana
@@ -590,7 +1042,7 @@ df_3_meses["Fecha Cumpleaños Calculado"] = df_3_meses.apply(
 )
 
 # Mostrar la tabla con el formato condicional y ordenada por fecha más cercana
-st.subheader("🎂 Empleados con Cumpleaños Dentro de 3 Meses 🎉")
+st.subheader("🎂 Empleados con Cumpleaños Dentro de 30 Dias 🎉")
 
 st.write(
     df_3_meses[
@@ -598,6 +1050,25 @@ st.write(
     ].to_html(escape=False),
     unsafe_allow_html=True
 )
+
+
+
+# FIN SECCION TABLA CON CUMPLEANOS CON FORMATO CONDICIONAL:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Segunda sección para empleados por estatus
 st.markdown("<hr>", unsafe_allow_html=True)  # Separador para claridad
@@ -663,148 +1134,6 @@ bar_estatus = px.bar(
 )
 
 st.plotly_chart(bar_estatus, use_container_width=True)  # Gráfico para empleados por estatus
-
-
-
-
-
-
-
-# Cargar datos desde Excel
-df = pd.read_excel("BASE_DE_DATOS_EMPLEADOS_ANALISIS_RRHH_DASHBOARD.xlsx")
-
-# Definir estilo CSS para las tarjetas
-style_card = """
-    <style>
-    .custom-card {
-        border: 1px solid black;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px 0 rgba(50, 205, 50, 0.2);  # Sombra verde limón
-        background-color: white;
-        padding: 10px;
-        text-align: center;
-    }
-    
-    .custom-card h1 {
-        font-weight: bold;
-        color: red;  # Color rojo para valores numéricos
-    }
-    
-    .custom-card p {
-        font-weight: bold;
-    }
-    </style>
-"""
-
-
-# Aplicar el estilo CSS personalizado
-st.markdown(style_card, unsafe_allow_html=True)
-
-# Sección para las tarjetas
-st.subheader("📊Resumen de Registros")
-
-# Filtrar por "Renuncia" y "Despedido"
-renuncia_df = df[df["Status"] == "Renuncia"]
-despido_df = df[df["Status"] == "Despedido"]
-
-# Crear tarjetas para conteos
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown(
-        f"""
-        <div class="custom-card">
-            <p>Número de Registros de Renuncia</p>
-            <h1>{len(renuncia_df)}</h1>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with col2:
-    st.markdown(
-        f"""
-        <div class="custom-card">
-            <p>Número de Registros de Despido</p>
-            <h1>{len(despido_df)}</h1>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-# Sección para los gráficos
-st.subheader("📊Gráficos de Motivos de Renuncia y Despido")
-
-# Segmentador para empleados de renuncia y despido
-empleados_renuncia = renuncia_df["Nombre Empleado"].unique()
-empleados_despido = despido_df["Nombre Empleado"].unique()
-
-# Agregar segmentador para empleados de renuncia
-empleados_seleccionados_renuncia = st.multiselect(
-    "Seleccione empleados para el gráfico de renuncia:",
-    empleados_renuncia,
-)
-
-# Agregar segmentador para empleados de despido
-empleados_seleccionados_despido = st.multiselect(
-    "Seleccione empleados para el gráfico de despido:",
-    empleados_despido,
-)
-
-
-
-
-
-# Filtrar por empleados seleccionados antes de crear gráficos
-if empleados_seleccionados_renuncia:
-    renuncia_df = renuncia_df[renuncia_df["Nombre Empleado"].isin(empleados_seleccionados_renuncia)]
-
-if empleados_seleccionados_despido:
-    despido_df = despido_df[despido_df["Nombre Empleado"].isin(empleados_seleccionados_despido)]
-
-# Gráfico de barras horizontales para motivos de renuncia
-if not renuncia_df.empty:
-    # Agrupar y pintar barras con diferentes colores
-    renuncia_motivos = renuncia_df.groupby("Motivos Renuncia/Despiedos").size().reset_index(name="Empleados")
-
-    renuncia_bar = px.bar(
-        renuncia_motivos,
-        x="Empleados",  # El número de empleados en el eje X
-        y="Motivos Renuncia/Despiedos",  # El motivo en el eje Y
-        orientation='h',
-        color="Motivos Renuncia/Despiedos",  # Diferentes colores para cada motivo
-        title="🤝 Motivos de Renuncia"
-    )
-    renuncia_bar.update_layout(
-        yaxis_title="Motivos de Renuncia",
-        xaxis_title="Número de Empleados",
-        height=400
-    )
-
-    st.plotly_chart(renuncia_bar, use_container_width=True)
-
-# Gráfico de barras horizontales para motivos de despido
-if not despido_df.empty:
-    # Agrupar y pintar barras con diferentes colores
-    despido_motivos = despido_df.groupby("Motivos Renuncia/Despiedos").size().reset_index(name="Empleados")
-
-    despido_bar = px.bar(
-        despido_motivos,
-        x="Empleados",  # El número de empleados en el eje X
-        y="Motivos Renuncia/Despiedos",  # El motivo en el eje Y
-        orientation='h',
-        color="Motivos Renuncia/Despiedos",  # Diferentes colores para cada motivo
-        title="❌ Motivos de Despido"
-    )
-    despido_bar.update_layout(
-        yaxis_title="Motivos de Despido",
-        xaxis_title="Número de Empleados",
-        height=400
-    )
-
-    st.plotly_chart(despido_bar, use_container_width=True)
-
 
 
 
