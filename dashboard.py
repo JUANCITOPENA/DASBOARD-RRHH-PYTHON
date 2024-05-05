@@ -7,7 +7,6 @@ import folium
 from streamlit_folium import st_folium
 import datetime
 
-
 # Configurar el layout para que sea de ancho completo
 st.set_page_config(layout="wide")
 
@@ -550,7 +549,7 @@ df["Fecha Cumpleaños Calculado"] = df["Nacimiento"].apply(lambda x: calcular_pr
 df["Días hasta Cumpleaños"] = (df["Fecha Cumpleaños Calculado"] - fecha_actual).dt.days
 
 # Filtrar para mostrar solo empleados con cumpleaños dentro de 3 meses (90 días)
-df_3_meses = df[df["Días hasta Cumpleaños"] <= 90]
+df_3_meses = df[df["Días hasta Cumpleaños"] <= 30]
 
 # Ordenar por fecha de cumpleaños más cercana
 df_3_meses = df_3_meses.sort_values(by="Fecha Cumpleaños Calculado")
@@ -559,9 +558,9 @@ df_3_meses = df_3_meses.sort_values(by="Fecha Cumpleaños Calculado")
 def obtener_color(dias):
     if dias == 0:
         return "green"
-    elif dias <= 15:
+    elif dias <= 10:
         return "red"
-    elif dias <= 30:
+    elif dias <= 15:
         return "orange"
     else:
         return "gray"
