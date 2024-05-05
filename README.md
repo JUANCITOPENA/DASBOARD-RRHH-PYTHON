@@ -20,21 +20,20 @@ El proyecto se basa en varias tecnologías clave, como Streamlit para crear apli
 
 Para instalar las dependencias del proyecto, necesitas tener Python y `pip` configurados. Luego, puedes instalar las librerías necesarias ejecutando el siguiente comando en la terminal:
 
-```bash
-pip install -r requirements.txt
+- ** pip install -r requirements.txt
 
 ### Ejecución
 Para ejecutar el dashboard, utiliza el siguiente comando, asegurándote de reemplazar nombre_del_archivo.py con el nombre del archivo Python que contiene el código del dashboard:
 
-streamlit run nombre_del_archivo.py
+- ** streamlit run nombre_del_archivo.py
 
 ### Cómo Contribuir
 Si deseas contribuir al proyecto, sigue estos pasos:
 
-Haz un fork de este repositorio.
-Crea una nueva rama para tus cambios.
-Realiza tus modificaciones y haz commit.
-Envía un pull request para revisión.
+- **Haz un fork de este repositorio.
+- **Crea una nueva rama para tus cambios.
+- **Realiza tus modificaciones y haz commit.
+- **Envía un pull request para revisión.
 
 ### Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para más detalles.
@@ -43,6 +42,6 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para más 
 ### Contacto
 Si tienes preguntas, sugerencias o necesitas ayuda, puedes contactarme a través de los siguientes medios:
 
-LinkedIn
-GitHub
-Correo Electrónico
+- **LinkedIn
+- **GitHub
+- **Correo Electrónico
