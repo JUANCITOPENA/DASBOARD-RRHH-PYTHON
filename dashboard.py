@@ -41,47 +41,44 @@ st.markdown(
     text-align: center;
 }
 
-.card_kpi {
-        border: 1px solid black;
+    .card_kpi {
+        padding: 20px;
+        border: 1px sólido #ddd;
         border-radius: 10px;
-        box-shadow: 0 4px 8px 0 rgba(50, 205, 50, 0.2);  # Sombra verde limón
-        background-color: white;
-        padding: 10px;
-        text-align: center;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+        background-color: #f9f9f9;
+        text-align: center;  /* Centrar el texto horizontalmente */
+        width: 160px;  /* Ancho fijo */
+        height: 130px;  /* Alto fijo */
+        display: flex;  /* Uso de flex para centrar el contenido */
+        flex-direction: column;  /* Alineación vertical del contenido */
+        align-items: center;  /* Centrar horizontalmente dentro del contenedor */
+        justify-content: center;  /* Centrar verticalmente dentro del contenedor */
+        margin: 5px;  /* Espacio entre tarjetas */
+        overflow: hidden;  /* Asegurar que el contenido no se desborde */
+        font-size: 14px;
     }
-    
-    .card_kpi  h1 {
-        font-weight: bold;
-        color: red;  # Color rojo para valores numéricos
+    .card_kpi p {
+        margin: 0;  /* Eliminar márgenes para un mejor ajuste */
     }
-    
-    .card_kpi  p {
-        font-weight: bold;
+    .card_kpi strong {
+        font-weight: bold;  /* Negrita para texto destacado */
     }
-.card_kpi {
-    padding: 20px;
-    border: 1px sólido #ddd;
-    border-radius: 10px;
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
-    background-color: #f9f9f9;
-    text-align: center;  /* Centrar el texto horizontalmente */
-    width: 170px;  /* Ancho fijo */
-    height: 150px;  /* Alto fijo */
-    display: flex;  /* Uso de flex para centrar el contenido */
-    flex-direction: column;  /* Alineación vertical del contenido */
-    align-items: center;  /* Centrar horizontalmente dentro del contenedor */
-    justify-content: center;  /* Centrar verticalmente dentro del contenedor */
-    margin: 10px;  /* Espacio entre tarjetas */
-    overflow: hidden;  /* Asegurar que el contenido no se desborde */
-}
-.card_kpi p {
-    margin: 0;  /* Eliminar márgenes para un mejor ajuste */
-}
-.card_kpi strong {
-    font-weight: bold;  /* Negrita para texto destacado */
-}
 
+    @media (max-width: 768px) {
+        .card_kpi {
+            width: 98%;  # Ancho para dispositivos móviles
+            height: auto;  # Permitir que el alto sea dinámico
+            flex-direction: row;  # Cambiar la dirección del contenido
+            justify-content: flex-start;  # Alinear a la izquierda
+            font-size: 20px;
+        }
 
+        .card_kpi + .card_kpi {
+            margin-top: 10px;  # Espacio entre tarjetas cuando se apilan
+             font-size: 20px;
+        }
+    }
 </style>
 
 
@@ -90,35 +87,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-# Definir estilo CSS para las tarjetas
-style_card = """
-    <style>
-    .custom-card {
-        border: 1px solid black;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px 0 rgba(50, 205, 50, 0.2);  # Sombra verde limón
-        background-color: white;
-        padding: 10px;
-        text-align: center;
-    }
-    
-    .custom-card h1 {
-        font-weight: bold;
-        color: red;  # Color rojo para valores numéricos
-    }
-    
-    .custom-card p {
-        font-weight: bold;
-    }
-    </style>
-"""
 # Título y subtítulo centrados
 st.markdown('<h1 class="center-text">🧑‍💼 Dashboard de Recursos Humanos 👥</h1>', unsafe_allow_html=True)
 st.markdown('<h3 class="center-text">Creado por Juancito Peña</h3>', unsafe_allow_html=True)
-
-# Línea horizontal para dividir secciones
-st.markdown("<hr>", unsafe_allow_html=True)
 
 
 # Título para la tabla con emoji, centrado
