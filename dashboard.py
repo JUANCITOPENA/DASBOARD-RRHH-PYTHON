@@ -40,6 +40,24 @@ st.markdown(
 .center-text {
     text-align: center;
 }
+
+.card_kpi {
+        border: 1px solid black;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(50, 205, 50, 0.2);  # Sombra verde limón
+        background-color: white;
+        padding: 10px;
+        text-align: center;
+    }
+    
+    .card_kpi  h1 {
+        font-weight: bold;
+        color: red;  # Color rojo para valores numéricos
+    }
+    
+    .card_kpi  p {
+        font-weight: bold;
+    }
 .card_kpi {
     padding: 20px;
     border: 1px sólido #ddd;
@@ -62,13 +80,39 @@ st.markdown(
 .card_kpi strong {
     font-weight: bold;  /* Negrita para texto destacado */
 }
+
+
 </style>
+
 
 
     """,
     unsafe_allow_html=True
 )
 
+
+# Definir estilo CSS para las tarjetas
+style_card = """
+    <style>
+    .custom-card {
+        border: 1px solid black;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(50, 205, 50, 0.2);  # Sombra verde limón
+        background-color: white;
+        padding: 10px;
+        text-align: center;
+    }
+    
+    .custom-card h1 {
+        font-weight: bold;
+        color: red;  # Color rojo para valores numéricos
+    }
+    
+    .custom-card p {
+        font-weight: bold;
+    }
+    </style>
+"""
 # Título y subtítulo centrados
 st.markdown('<h1 class="center-text">🧑‍💼 Dashboard de Recursos Humanos 👥</h1>', unsafe_allow_html=True)
 st.markdown('<h3 class="center-text">Creado por Juancito Peña</h3>', unsafe_allow_html=True)
