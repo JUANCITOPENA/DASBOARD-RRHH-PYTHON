@@ -6,7 +6,7 @@ import numpy as np  # Asegurarse de importar numpy
 import folium
 from streamlit_folium import st_folium
 import datetime
-import streamlit as st
+import math
 
 
 # Configurar el layout para que sea de ancho completo
@@ -90,12 +90,12 @@ st.markdown(
 )
 
 # Título y subtítulo centrados
-st.markdown('<h1 class="center-text">🧑‍💼 Dashboard de Recursos Humanos 👥</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="center-text">🧑‍💼 ¡Bienvenidos al informe de Recursos Humanos! 👥</h1>', unsafe_allow_html=True)
 st.markdown('<h3 class="center-text">Creado por Juancito Peña</h3>', unsafe_allow_html=True)
 
 
 # Título para la tabla con emoji, centrado
-st.markdown("<h2 style='text-align: center;'>📊 Indicadores Claves</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>📊 Indicadores </h2>", unsafe_allow_html=True)
 
 
 # Crear nueve columnas para las tarjetas
@@ -166,12 +166,83 @@ with col9:
         unsafe_allow_html=True
     )
 
+ # Espacio adicional para separar
+st.write("")  # Espacio para mejorar visualización
+    
+
+
+
+# Título para la tabla con emoji, centrado
+st.markdown("<h2 style='text-align: center;'>📊 Narrativa de los Indicadores </h2>", unsafe_allow_html=True)
+
+
+
+# Estilo CSS para centrado y ajuste del tamaño de fuente
+st.markdown(
+    """
+    <style>
+    .narrativa {
+        text-align: center;  # Centramos el texto
+        font-size: 50px;  # Ajustamos el tamaño de la fuente a 20px
+        line-height: 1.5;  # Ajustamos el espaciado entre líneas para mayor legibilidad
+        padding: 10px;  # Espacio para evitar que el texto quede pegado a los bordes
+        font-weight: bold;  # Asegura que la negrita se mantenga
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Calcular indicadores clave
+total_empleados = df.shape[0]
+empleados_activos = df[df["Status"] == "Activo"].shape[0]
+empleados_inactivos = df[df["Status"] != "Activo"].shape[0]
+departamentos = df["Departamento"].nunique()
+nomina_total = df["Sueldo"].sum()
+
+# Calcular total de renuncias y despedidos
+total_renuncias = df[df["Status"] == "Renuncia"].shape[0]
+total_despedidos = df[df["Status"] == "Despedido"].shape[0]
+
+# Calcular porcentajes
+porcentaje_activos = (empleados_activos / total_empleados) * 100
+porcentaje_inactivos = (empleados_inactivos / total_empleados) * 100
+porcentaje_renuncias = (total_renuncias / total_empleados) * 100
+porcentaje_despedidos = (total_despedidos / total_empleados) * 100
+
+# Crear narrativa explicativa con el formato centrado y tamaño de fuente ajustado
+narrativa = f"""
+<div class='narrativa'>
+En nuestra empresa, contamos con un total de **{total_empleados} empleados acumulados**. De estos, **{empleados_activos} están activos** ✅, representando un **{porcentaje_activos:.2f}%** del total. Por otro lado, **{empleados_inactivos} están inactivos** ❌, representando un **{porcentaje_inactivos:.2f}%**.
+
+La nómina total de la empresa asciende a **${nomina_total:,.2f}** 💰. En cuanto a salidas, **{total_renuncias} empleados renunciaron** ⚠️, representando un **{porcentaje_renuncias:.2f}%**, y **{total_despedidos} empleados fueron despedidos** ❌, lo cual equivale a un **{porcentaje_despedidos:.2f}%**.
+
+En términos de departamentos, contamos con **{departamentos} departamentos** 🏢, con una distribución de **49.7% empleados masculinos** y **50.3% empleados femeninos** 👨‍💼👩‍💼.
+
+Actualmente, hay **{df["Posición"].nunique()} posiciones únicas** en la empresa, proporcionando una amplia variedad de roles y responsabilidades.
+</div>
+"""
+
+# Mostrar la narrativa en Streamlit con estilo aplicado
+st.markdown(narrativa, unsafe_allow_html=True)
+
+
+
+
+
+
+
 
 # Línea horizontal para dividir secciones
 st.markdown("<hr>", unsafe_allow_html=True)
 
 
+ # Espacio adicional para separar
+st.write("")  # Espacio para mejorar visualización
+    
 
+    
+    
 # Título para la sección de gráficos, con emoji y centrado
 st.markdown("<h2 style='text-align: center;'>📊 Gráficos de Empleados por Año y Mes</h2>", unsafe_allow_html=True)
 
@@ -1138,6 +1209,74 @@ st.plotly_chart(bar_estatus, use_container_width=True)  # Gráfico para empleado
 
 
 
+# Título para la sección de gráficos, con emoji y centrado
+st.markdown("<h3 style='text-align: center;'> 📊 Distribucion por Departamentos.📊</h3>", unsafe_allow_html=True)
+
+# Obtener conteo de empleados por posición
+posiciones = df["Posición"].value_counts().reset_index()
+posiciones.columns = ["Posición", "Cantidad de Empleados"]
+
+# Dividir el DataFrame en tres partes
+total_posiciones = len(posiciones)  # Total de posiciones
+segment_size = math.ceil(total_posiciones / 3)  # Tamaño de cada segmento
+
+# Crear tres subconjuntos del DataFrame
+posiciones_1 = posiciones.iloc[:segment_size]  # Primer segmento
+posiciones_2 = posiciones.iloc[segment_size:2 * segment_size]  # Segundo segmento
+posiciones_3 = posiciones.iloc[2 * segment_size:]  # Tercer segmento
+
+# Crear gráficos de barras verticales para cada subconjunto
+grafico_1 = px.bar(
+    posiciones_1,
+    x="Posición",
+    y="Cantidad de Empleados",
+    title="Distribución de Empleados por Posición - Segmento 1",
+    text_auto=True,
+    color="Posición",
+    template="plotly_white",
+)
+
+grafico_2 = px.bar(
+    posiciones_2,
+    x="Posición",
+    y="Cantidad de Empleados",
+    title="Distribución de Empleados por Posición - Segmento 2",
+    text_auto=True,
+    color="Posición",
+    template="plotly_white",
+)
+
+grafico_3 = px.bar(
+    posiciones_3,
+    x="Posición",
+    y="Cantidad de Empleados",
+    title="Distribución de Empleados por Posición - Segmento 3",
+    text_auto=True,
+    color="Posición",
+    template="plotly_white",
+)
+
+# Crear tres columnas en una fila para los gráficos
+col1, col2, col3 = st.columns(3)
+
+# Mostrar gráficos de barras verticales, cada uno en su columna
+with col1:
+    st.plotly_chart(grafico_1, use_container_width=True)
+
+with col2:
+    st.plotly_chart(grafico_2, use_container_width=True)
+
+with col3:
+    st.plotly_chart(grafico_3, use_container_width=True)
+
+
+
+# Línea horizontal para dividir secciones
+st.markdown("<hr>", unsafe_allow_html=True)
+
+
+ # Espacio adicional para separar
+st.write("")  # Espacio para mejorar visualización
 
 
 
