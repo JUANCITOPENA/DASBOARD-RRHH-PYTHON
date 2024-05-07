@@ -5,4 +5,3 @@ streamlit>=1.26.0
 folium>=0.14.0
 streamlit-folium>=0.14.0
 openpyxl
-math
