@@ -420,11 +420,6 @@ with col2:
     )
 
 
-
-
-# Cargar datos desde Excel
-df = pd.read_excel("BASE_DE_DATOS_EMPLEADOS_ANALISIS_RRHH_DASHBOARD.xlsx")
-
 # Definir estilo CSS para las tarjetas
 style_card = """
     <style>
@@ -506,7 +501,7 @@ empleados_seleccionados_despido = st.multiselect(
 
 
 
-
+# CREACION DE TABLA Y BUSQUEDA POR FILTROS VARIOS:
 
 # Filtrar por empleados seleccionados antes de crear gráficos
 if empleados_seleccionados_renuncia:
@@ -558,9 +553,8 @@ if not despido_df.empty:
     st.plotly_chart(despido_bar, use_container_width=True)
 
 
-
 # Título para las tablas, centrado y con emojis
-st.markdown("<h2 style='text-align: center;'>🚪 Empleados que Renunciaron y 🔥 Fueron Despedidos 📊</h2>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center;'>🚪 Empleados que Renunciaron y/o 🔥 Fueron Despedidos 📊</h3>", unsafe_allow_html=True)
 
 # Filtrar por empleados que renunciaron y empleados que fueron despedidos
 renuncias_df = df[df["Status"] == "Renuncia"]
@@ -580,6 +574,7 @@ st.markdown(
         font-size: 14px;  /* Tamaño de fuente más pequeño */
         text-align: left;  /* Alineación del texto */
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);  /* Sombra para dar profundidad */
+       
     }
     .styled-table thead tr {
         background-color: darkblue;  /* Fondo para el encabezado */
@@ -604,6 +599,8 @@ st.markdown(
     .styled-table tbody tr:hover {
         background-color: #f1f1f1;  /* Color de fondo al pasar el cursor */
     }
+    
+    
     </style>
     """,
     unsafe_allow_html=True
@@ -629,30 +626,57 @@ with col2:
             .to_html(index=False, classes="styled-table"),  # Aplicar estilo
         unsafe_allow_html=True
     )
+
+
+
+    
+    
     
 # FIN DE LA TABLA CON LOS DATOS DE RENUNCIA Y DESPIDOS:
 
 
 
+# Estilo CSS para mejorar la visibilidad de la caja de entrada
+st.markdown(
+    """
+    <style>
+    .search-container {
+        background-color: lightblue;  # Cambia el color de fondo aquí
+        padding: 20px;
+        border-radius: 10px;
+    }
+    </style>
+    
+    """,
+    unsafe_allow_html=True
+)
 
-# Asegurarse de que las columnas para filtrar existen en el DataFrame
+# Título para la sección de búsqueda
+st.subheader("🔍 Buscar empleados por criterios: Código, Nombre, Departamento y/o Posición:")
+
+# Asegurarse de que las columnas requeridas están presentes en el DataFrame
 required_columns = ["ID Empleado", "Nombre Empleado", "Departamento", "Posición"]
 missing_columns = [col for col in required_columns if col not in df.columns]
 
 if missing_columns:
-    raise ValueError(f"Las siguientes columnas no están presentes en el DataFrame: {missing_columns}")
+    raise ValueError(f"Las siguientes columnas no están presentes en el DataFrame: {', '.join(missing_columns)}")
 
-# Crear un contenedor para la caja de búsqueda
+# Crear el contenedor para la búsqueda con el estilo aplicado
 with st.container():
-    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-    search_term = st.text_input("Buscar por código, nombre, departamento o posición:", key="search_term")
+    st.markdown("<div class='search-container'>", unsafe_allow_html=True)  # Aplicar el fondo al contenedor
+
+    # Caja de entrada para búsqueda con el estilo aplicado
+    search_term = st.text_input("Ingrese el término de búsqueda:", key="search_term")
+
+    # Botón para buscar
     search_button = st.button("🔍 Buscar", key="search_button")
-    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)  # Cerrar el contenedor estilizado
 
 # Filtrar el DataFrame según el término de búsqueda
-filtered_df = df  # Mostrar todo por defecto
+filtered_df = df  # Mostrar todos los datos por defecto
 
-# Si el término de búsqueda tiene contenido, aplica el filtro
+# Si el término de búsqueda tiene contenido, aplicar el filtro
 if search_term:
     filtered_df = df[
         df.apply(
@@ -663,15 +687,12 @@ if search_term:
         )
     ]
 
-# Si se presiona el botón y no hay término de búsqueda, limpiar
+# Restablecer la tabla completa si el botón de búsqueda es presionado sin término
 if search_button and not search_term:
-    filtered_df = df  # Restablecer la tabla completa
+    filtered_df = df  # Restablecer el contenido completo
 
-# Mostrar la tabla paginada centrada
-st.dataframe(filtered_df.style.set_properties(**{'text-align': 'center'}))
-
-
-
+# Mostrar el DataFrame filtrado con propiedades centradas
+st.dataframe(filtered_df.style.set_properties(**{"text-align": "center"}))
 
 
 
@@ -945,89 +966,104 @@ with col2:
 st.markdown("<hr>", unsafe_allow_html=True)  # Separador para claridad
 
  
-# Encontrar el empleado con la evaluación más alta y más baja
-max_evaluacion_index = df["Evaluación"].idxmax()  # Índice de la evaluación más alta
-min_evaluacion_index = df["Evaluación"].idxmin()  # Índice de la evaluación más baja
+ 
+ 
+ 
+ 
+# Limpiar el DataFrame para evitar NaN
+df_clean = df.dropna(subset=["Evaluación", "Edad", "Nombre Empleado"])  # Eliminar filas con NaN en columnas clave
 
-max_evaluacion_employee = df.loc[max_evaluacion_index, "Nombre Empleado"]  # Empleado con la evaluación más alta
-min_evaluacion_employee = df.loc[min_evaluacion_index, "Nombre Empleado"]  # Empleado con la evaluación más baja
+# Verificar si la columna "Evaluación" tiene datos válidos
+if not df_clean["Evaluación"].isnull().all() and not df_clean.empty:
+    max_evaluacion_index = df_clean["Evaluación"].idxmax()  # Índice de la evaluación más alta
+    min_evaluacion_index = df_clean["Evaluación"].idxmin()  # Índice de la evaluación más baja
 
-# Encontrar el empleado con la edad más alta y más baja
-max_edad_index = df["Edad"].idxmax()  # Índice de la edad más alta
-min_edad_index = df["Edad"].idxmin()  # Índice de la edad más baja
+    # Encontrar los empleados con la evaluación más alta y más baja
+    max_evaluacion_employee = df_clean.loc[max_evaluacion_index, "Nombre Empleado"]  # Empleado con la evaluación más alta
+    min_evaluacion_employee = df_clean.loc[min_evaluacion_index, "Nombre Empleado"]  # Empleado con la evaluación más baja
 
-max_edad_employee = df.loc[max_edad_index, "Nombre Empleado"]  # Empleado con la edad más alta
-min_edad_employee = df.loc[min_edad_index, "Nombre Empleado"]  # Empleado con la edad más baja
+    # Crear dos columnas para mostrar los gráficos
+    col1, col2 = st.columns(2)  # Dividir en dos columnas
 
-# Crear dos columnas para mostrar los gráficos
-col1, col2 = st.columns(2)  # Dividir en dos columnas
+    # Gráfico de barras para evaluación máxima y mínima por empleado
+    with col1:
+        df_evaluacion = pd.DataFrame({
+            "Empleado": [max_evaluacion_employee, min_evaluacion_employee],  # Nombres de empleados
+            "Evaluación": [df_clean.loc[max_evaluacion_index, "Evaluación"], df_clean.loc[min_evaluacion_index, "Evaluación"]]  # Evaluación
+        })
 
-# Gráfico de barras para evaluación máxima y mínima por empleado
-with col1:
-    df_evaluacion = pd.DataFrame({
-        "Empleado": [max_evaluacion_employee, min_evaluacion_employee],  # Nombres de empleados
-        "Evaluación": [df.loc[max_evaluacion_index, "Evaluación"], df.loc[min_evaluacion_index, "Evaluación"]]  # Evaluación
-    })
+        bar_evaluacion = px.bar(
+            df_evaluacion,
+            x="Empleado",
+            y="Evaluación",
+            title="Evaluación Máxima y Mínima por Empleado",
+            text_auto=True,  # Mostrar etiquetas automáticamente
+            color="Empleado",  # Variación de colores
+            orientation="v"  # Barras verticales
+        )
 
-    bar_evaluacion = px.bar(
-        df_evaluacion,
-        x="Empleado",
-        y="Evaluación",
-        title="Evaluación Máxima y Mínima por Empleado",
-        text_auto=True,  # Mostrar etiquetas automáticamente
-        color="Empleado",  # Variación de colores
-        orientation="v"  # Barras verticales
-    )
-    
-    # Ajustar la posición del texto y otras configuraciones
-    bar_evaluacion.update_traces(
-        textposition='outside',  # Colocar etiquetas fuera de las barras para mayor claridad
-        textfont=dict(size=12, color='black', weight='bold')  # Texto en negrita
-    )
-    
-    bar_evaluacion.update_layout(
-        height=500,  # Aumentar la altura del gráfico
-        bargap=0.3,  # Espacio entre barras para claridad
-        xaxis_title="Empleado",
-        yaxis_title="Evaluación"
-    )
-    
-    st.plotly_chart(bar_evaluacion, use_container_width=True)  # Mostrar el gráfico
+        # Ajustar la posición del texto y otras configuraciones
+        bar_evaluacion.update_traces(
+            textposition='outside',  # Colocar etiquetas fuera de las barras para mayor claridad
+            textfont=dict(size=12, color='black', weight='bold')  # Texto en negrita
+        )
 
-# Gráfico de barras para edad máxima y mínima por empleado
-with col2:
-    df_edad = pd.DataFrame({
-        "Empleado": [max_edad_employee, min_edad_employee],  # Empleados
-        "Edad": [df.loc[max_edad_index, "Edad"], df.loc[min_edad_index, "Edad"]]  # Edad
-    })
+        bar_evaluacion.update_layout(
+            height=500,  # Aumentar la altura del gráfico
+            bargap=0.3,  # Espacio entre barras para claridad
+            xaxis_title="Empleado",
+            yaxis_title="Evaluación"
+        )
 
-    bar_edad = px.bar(
-        df_edad,
-        x="Empleado",
-        y="Edad",
-        title="Edad Máxima y Mínima por Empleado",
-        text_auto=True,
-        color="Empleado",  # Variación de colores
-        orientation="v"  # Barras verticales
-    )
-    
-    # Ajustar la posición del texto y otras configuraciones
-    bar_edad.update_traces(
-        textposition='outside',  # Colocar etiquetas fuera de las barras para mayor claridad
-        textfont=dict(size=12, color='black', weight='bold')  # Texto en negrita
-    )
-    
-    bar_edad.update_layout(
-        height=500,  # Aumentar la altura del gráfico
-        bargap=0.3,  # Espacio entre barras para claridad
-        xaxis_title="Empleado",
-        yaxis_title="Edad (años)"
-    )
-    
-    st.plotly_chart(bar_edad, use_container_width=True)  # Mostrar el gráfico
+        st.plotly_chart(bar_evaluacion, use_container_width=True)  # Mostrar el gráfico
 
-# Segunda sección para empleados por estatus
-st.markdown("<hr>", unsafe_allow_html=True)  # Separador para claridad
+    # Gráfico de barras para edad máxima y mínima por empleado
+    with col2:
+        max_edad_index = df_clean["Edad"].idxmax()  # Índice de la edad más alta
+        min_edad_index = df_clean["Edad"].idxmin()  # Índice de la edad más baja
+
+        if max_edad_index is not None and min_edad_index is not None:
+            df_edad = pd.DataFrame({
+                "Empleado": [df_clean.loc[max_edad_index, "Nombre Empleado"], df_clean.loc[min_edad_index, "Nombre Empleado"]],  # Empleados
+                "Edad": [df_clean.loc[max_edad_index, "Edad"], df_clean.loc[min_edad_index, "Edad"]]  # Edad
+            })
+
+            bar_edad = px.bar(
+                df_edad,
+                x="Empleado",
+                y="Edad",
+                title="Edad Máxima y Mínima por Empleado",
+                text_auto=True,
+                color="Empleado",  # Variación de colores
+                orientation="v"  # Barras verticales
+            )
+
+            # Ajustar la posición del texto y otras configuraciones
+            bar_edad.update_traces(
+                textposition='outside',  # Colocar etiquetas fuera de las barras para mayor claridad
+                textfont=dict(size=12, color='black', weight='bold')  # Texto en negrita
+            )
+
+            bar_edad.update_layout(
+                height=500,  # Aumentar la altura del gráfico
+                bargap=0.3,  # Espacio entre barras para claridad
+                xaxis_title="Empleado",
+                yaxis_title="Edad (años)"
+            )
+
+            st.plotly_chart(bar_edad, use_container_width=True)  # Mostrar el gráfico
+
+else:
+    st.warning("La columna 'Evaluación' está vacía o contiene solo valores NaN.")  # Mensaje de advertencia
+ 
+ 
+ 
+ 
+
+
+
+
+
 
 
 
